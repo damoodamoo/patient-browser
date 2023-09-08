@@ -1,0 +1,30 @@
+[
+    [
+      "system",
+      "You are a knowledgeable medical doctor."
+    ],
+    [
+      "system",
+      "I am this patient:"
+    ],
+    [
+      "system",
+      "{patient_yaml}"
+    ],
+    [
+      "system",
+      "And these are my clinical measurements in FHIR format:"
+    ],
+    [
+      "system",
+      "{entries_yaml}"
+    ],
+    [
+      "system",
+      "write me a short summary of my {category} that a child would understand, highlighting any areas that need attention"
+    ],
+    [
+      "system",
+      "In a separate section that should start with word ANOMALIES: indicate any health anomalies."
+    ]
+  ]

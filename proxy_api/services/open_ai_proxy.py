@@ -3,6 +3,9 @@ import openai
 import json
 import tiktoken
 import yaml
+from langchain.llms import AzureOpenAI
+from langchain.chat_models import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
 load_dotenv(f'{os.path.dirname(__file__)}/../../.env')
 
@@ -11,6 +14,24 @@ openai.api_version = "2023-03-15-preview"
 openai.api_base = os.getenv("OPENAI_API_BASE")
 openai.api_key = os.getenv("OPENAI_API_KEY")
 openai_deployment_name = os.getenv("OPENAI_DEPLOYMENT_NAME")
+
+#Load json data from file
+prompt_messages = json.load(open(os.getenv("PROMPT"), 'r'))
+#Convert every element in the list to a tuple
+prompt_messages = [(x[0], x[1]) for x in prompt_messages]
+
+#print (prompt_messages)
+'''
+prompt_messages = [
+        ("system", "You are a knowledgeable medical doctor."),
+        ("system", "I am this patient:"),
+        ("system", "{patient_yaml}"),
+        ("system", "And these are my clinical measurements in FHIR format:"),
+        ("system", "{entries_yaml}"), 
+        ("system", "write me a short summary of my {category} that a child would understand, highlighting any areas that need attention"),
+        ("system", "In a separate section that should start with word ANOMALIES: indicate any health anomalies."),
+        ]
+'''
 
 # Function to optimize the JSON data for OpenAI
 # This was an attempt to optimize JSON data for OpenAI, but it is brittle and yields worse results
@@ -106,6 +127,15 @@ def query_open_ai(patient: dict, entries: list, category: str):
         entries_yaml_encode = entries_yaml_encode[:13000-len(patient_yaml_encode)]
         entries_yaml = encoding.decode(entries_yaml_encode)
 
+    template = ChatPromptTemplate.from_messages(messages = prompt_messages)
+    
+    messages = template.format_messages(
+            patient_yaml=patient_yaml,
+            entries_yaml=entries_yaml,
+            category=category
+    )
+
+    '''
     query_messages = [
             {"role": "system", "content": "You are a knowledgeable medical doctor."},
             {"role": "system", "content": "I am this patient:"},
@@ -114,10 +144,34 @@ def query_open_ai(patient: dict, entries: list, category: str):
             {"role": "system", "content": entries_yaml}, # optimized_entries_json - worse results
             {"role": "system", "content": f'write me a short summary of my {category} that a child would understand, highlighting any areas that need attention'},
             {"role": "system", "content": "In a separate section that should start with word ANOMALIES: indicate any health anomalies."},]
-    
+    '''
+
     # Write query data to file
     #data_file.write(f'querymessages: {query_messages}\n')
 
+    '''
+    llm = AzureOpenAI(deployment_name=os.getenv("OPENAI_DEPLOYMENT_NAME"),
+                      model_name="gpt-35-turbo-16k", 
+                      max_tokens=1200,
+                      openai_api_base=os.getenv("OPENAI_API_BASE"),
+                      openai_api_key=os.getenv("OPENAI_API_KEY"),
+                      openai_api_type="azure",
+                      openai_api_version="2023-03-15-preview",
+                      temperature=0,
+                      top_p=0.95,
+                      frequency_penalty=0,
+                      presence_penalty=0,)
+    '''
+    llm = ChatOpenAI(max_tokens=1200,
+                     engine=openai_deployment_name,
+                     openai_api_base=os.getenv("OPENAI_API_BASE"),
+                     openai_api_key=os.getenv("OPENAI_API_KEY"),
+                     temperature=0,)
+    
+    responseMessage = llm(messages=messages)
+    return responseMessage
+
+    '''
     response = openai.ChatCompletion.create(
         engine=openai_deployment_name,
         messages=query_messages,
@@ -127,7 +181,8 @@ def query_open_ai(patient: dict, entries: list, category: str):
         frequency_penalty=0,
         presence_penalty=0,
         stop=None)
-    
+    '''
+
     #Write response to file
     #data_file.write(f'response: {response}\n')
 
