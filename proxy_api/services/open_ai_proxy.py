@@ -83,7 +83,7 @@ def optimize_json(data):
     return optimized_data
 
 
-def query_open_ai(patient: dict, entries: list, category: str):
+def query_open_ai(patient: dict, entries: list, category: str, return_input: bool = False):
 
     #Open text file for appending
     #data_file = open("openai_data.txt", "a")
@@ -168,9 +168,8 @@ def query_open_ai(patient: dict, entries: list, category: str):
                      openai_api_key=os.getenv("OPENAI_API_KEY"),
                      temperature=0,)
     
-    responseMessage = llm(messages=messages)
-    return responseMessage
-
+    response = llm(messages=messages)
+    
     '''
     response = openai.ChatCompletion.create(
         engine=openai_deployment_name,
@@ -186,4 +185,7 @@ def query_open_ai(patient: dict, entries: list, category: str):
     #Write response to file
     #data_file.write(f'response: {response}\n')
 
-    return response
+    if return_input:
+        return response, messages
+    else:
+        return response
