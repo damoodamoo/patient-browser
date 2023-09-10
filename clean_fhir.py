@@ -49,46 +49,6 @@ def clean_file(input_file_path, output_file_path):
     with open(output_file_path, 'w') as output_file:
         json.dump(data, output_file, indent=4)
 
-'''
-def clean_text(text):
-    """
-    Function to clean text by removing stopwords and non-alphanumeric characters.
-    """
-    stop_words = set() #set(stopwords.words('english'))
-    words = text.split()
-    clean_words = [word for word in words if word.isalnum() and word.lower() not in stop_words]
-    return ' '.join(clean_words)
-
-def extract_medically_important_info(data):
-    """
-    Function to extract medically important information from the data.
-    """
-    important_info = []
-    for entry in data['entry']:
-        resource_type = entry['resource']['resourceType']
-        if resource_type == 'Patient':
-            # Extract patient details
-            patient_details = {key: entry['resource'].get(key, None) for key in ['id', 'gender', 'birthDate', 'name']}
-            important_info.append({'resourceType': 'Patient', 'details': patient_details})
-        elif resource_type in ['Observation', 'Condition', 'MedicationStatement', 'Procedure']:
-            # Extract details for other resource types
-            details = {key: entry['resource'].get(key, None) for key in ['id', 'code', 'value', 'onset', 'recordedDate']}
-            important_info.append({'resourceType': resource_type, 'details': details})
-    return important_info
-
-def clean_file(input_file_path, output_file_path):
-    # Read the JSON file
-    with open(input_file_path, 'r') as file:
-        data = json.load(file)
-    
-    # Extract medically important information
-    medically_important_info = extract_medically_important_info(data)
-    
-    # Write the cleaned data to a new JSON file
-    with open(output_file_path, 'w') as output_file:
-        json.dump(medically_important_info, output_file, indent=4)
-'''
-
 def clean_fhir_directory(input_directory, output_directory=None):
     import os
     if not output_directory:
