@@ -56,4 +56,9 @@ def process_fhir_directory(input_directory, print_output=False):
             process_fhir(os.path.join(input_directory, file), print_output)
 
 if __name__ == '__main__':
-    process_fhir_directory('temp', True)
+    # Process directory specified as input to the script
+    import sys
+    if len(sys.argv) > 1:
+        process_fhir_directory(sys.argv[1], True)
+    else:
+        process_fhir_directory('temp', True)

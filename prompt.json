@@ -13,7 +13,7 @@
     ],
     [
       "system",
-      "And these are my clinical measurements in FHIR format:"
+      "Please analyze the FHIR information provided to generate a comprehensive summary of the patient's medical history:"
     ],
     [
       "system",
@@ -21,10 +21,10 @@
     ],
     [
       "system",
-      "write me a short summary of my {category} that a child would understand, highlighting any areas that need attention"
+      "Your summary should start with word SUMMARY:. It should be clear, concise, and understandable for individuals without a medical background."
     ],
     [
       "system",
-      "In a separate section that should start with word ANOMALIES: indicate any health anomalies."
+      "In a separate section that should start with word ANOMALIES: summarize any health issues or anomalies. This section should be clear, concise, and understandable for individuals without a medical background."
     ]
   ]

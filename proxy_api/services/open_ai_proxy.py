@@ -33,56 +33,6 @@ prompt_messages = [
         ]
 '''
 
-# Function to optimize the JSON data for OpenAI
-# This was an attempt to optimize JSON data for OpenAI, but it is brittle and yields worse results
-# Not currently used except to show how much fewer tokens we might be able to generate
-def optimize_json(data):
-    optimized_data = {}
-
-    # Optimize patient details
-    patient = data.get('patient', {})
-    optimized_data['patient'] = {
-        'type': patient.get('resourceType'),
-        'id': patient.get('id'),
-        'race': patient.get('extension', [{}])[0].get('valueCodeableConcept', {}).get('coding', [{}])[0].get('display'),
-        'ethnicity': patient.get('extension', [{}])[1].get('valueCodeableConcept', {}).get('coding', [{}])[0].get('display'),
-        'birthPlace': patient.get('extension', [{}])[2].get('valueAddress'),
-        'mothersName': patient.get('extension', [{}])[3].get('valueString'),
-        'birthSex': patient.get('extension', [{}])[4].get('valueCode'),
-        'interpreterReq': patient.get('extension', [{}])[5].get('valueBoolean'),
-        'fictional': patient.get('extension', [{}])[6].get('valueBoolean'),
-        'fathersName': patient.get('extension', [{}])[7].get('valueHumanName', {}).get('text'),
-        'SSN': patient.get('extension', [{}])[8].get('valueString'),
-        'identifiers': [{ 
-            'system': identifier.get('system', '').split('/')[-1],
-            'value': identifier.get('value')
-        } for identifier in patient.get('identifier', [])],
-        'name': [{ 
-            'use': name.get('use'), 
-            'text': name.get('text')
-        } for name in patient.get('name', [])]
-    }
-
-    # Optimize observations
-    observations = data.get('entries', [])
-    optimized_data['entries'] = [
-        {
-            'type': obs.get('resource', {}).get('resourceType'),
-            'status': obs.get('resource', {}).get('status'),
-            'code': 'LDL-C' if obs.get('resource', {}).get('code', {}).get('text') == 'Low Density Lipoprotein Cholesterol' else obs.get('resource', {}).get('code', {}).get('coding', [{}])[0].get('display'),
-            'date': obs.get('resource', {}).get('effectiveDateTime'),
-            'value': obs.get('resource', {}).get('valueQuantity', {}).get('value'),
-            'unit': obs.get('resource', {}).get('valueQuantity', {}).get('unit')
-        } 
-        for obs in observations if obs.get('resource', {}).get('resourceType') == 'Observation'
-    ]
-
-    # Optimize category
-    #optimized_data['category'] = data.get('category')
-    
-    return optimized_data
-
-
 def query_open_ai(patient: dict, entries: list, category: str, return_input: bool = False):
 
     #Open text file for appending
