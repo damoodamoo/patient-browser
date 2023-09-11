@@ -1,6 +1,6 @@
 import json
 from proxy_api.services.open_ai_proxy import query_open_ai
-from evaluate import evaluate_summary
+from evaluate import evaluate_summary, evaluate_summary_openai
 
 def load_fhir(file_name):
     with open(file_name, 'r') as f:
@@ -41,7 +41,7 @@ def process_fhir(file_name, print_output=False):
         responses.append(response)
         if data_file:
             data_file.write(f'{key}_response: {response}\n')
-        eval_result = evaluate_summary(json.dumps(resources[key]), response)
+        eval_result = evaluate_summary_openai(json.dumps(resources[key]), response)
         if data_file:
             data_file.write(f'{key}_evaluate: {eval_result}\n')
     if data_file:
