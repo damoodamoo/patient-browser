@@ -26,6 +26,7 @@ def query_open_ai(patient_id: str, patient: dict = None, entries: list = [], cat
     setup_prompt = """You play the role of a medical doctor. 
         Read data about the following patient and respond to their questions. 
         Provide online references for any clinical advice.
+        Under a separate section entitled 'Anomolies', highlight any areas that need my attention.
         Give short responses in simple and concise language."""
     
     init_messages = [
@@ -71,25 +72,70 @@ def clean_patient(input: dict) -> dict:
         "gender": try_get_val(input, 'gender'),
         "birthDate": try_get_val(input,'birthDate'),
        # "address": f"{try_get_val(input['address'][0], 'line')[0]}, {try_get_val(input['address'][0], 'city')}, {try_get_val(input['address'][0], 'state')}, {try_get_val(input['address'][0], 'postalCode')}, {try_get_val(input['address'][0], 'country')}",
-        "maritalStatus": try_get_val(try_get_val(input, 'maritalStatus'), 'text')
+        "maritalStatus": try_get_val(try_get_val(input, 'maritalStatus'), 'text'),
+        "deceasedDateTime": try_get_val(input, 'deceasedDateTime')
     }
     return clean_patient
 
 
 def clean_entries(entries: list):
+    clean_entries = []
+
     for entry in entries:
-        entry.pop('fullUrl', None)
-        entry.pop('search', None)
-        entry['resource'].pop('meta', None)
-        entry['resource'].pop('subject', None)
-        entry['resource'].pop('id', None)
-        entry['resource'].pop('context', None)
-        entry['resource'].pop('reasonReference', None)
-        entry['resource'].pop('medicationReference', None)
-        if entry['resource']['resourceType'] == 'CommunicationRequest' or \
-            entry['resource']['resourceType'] == 'Procedure' or \
+        if entry['resource']['resourceType'] == 'Observation':
+            clean_entries.append(clean_observation(entry['resource']))
+        
+        elif entry['resource']['resourceType'] == 'Medication':
+            clean_entries.append(clean_medication(entry['resource']))
+
+        elif entry['resource']['resourceType'] == 'Procedure':
+            clean_entries.append(clean_procedure(entry['resource']))
+
+        elif entry['resource']['resourceType'] == 'CommunicationRequest' or \
             entry['resource']['resourceType'] == 'Questionnaire' or \
-            entry['resource']['resourceType'] == 'QuestionnaireResponse':
-            entry = {}
-    
-    return entries
+            entry['resource']['resourceType'] == 'QuestionnaireResponse' or \
+            entry['resource']['resourceType'] == 'CarePlan' or \
+            entry['resource']['resourceType'] == 'Encounter':
+            continue
+
+        else:
+            clean_entry = entry.copy()
+            clean_entry.pop('fullUrl', None)
+            clean_entry.pop('search', None)
+            clean_entry['resource'].pop('meta', None)
+            clean_entry['resource'].pop('subject', None)
+            clean_entry['resource'].pop('id', None)
+            clean_entry['resource'].pop('context', None)
+            clean_entry['resource'].pop('reasonReference', None)
+            clean_entry['resource'].pop('medicationReference', None)
+            clean_entries.append(clean_entry['resource'])
+            
+    print(clean_entries)
+    return clean_entries
+
+
+def clean_observation(entry: dict):
+    cleaned = {
+        "name": try_get_val(entry['code'], 'text'),
+        "value": try_get_val(try_get_val(entry, 'valueQuantity'), 'value'),
+        "unit": try_get_val(try_get_val(entry, 'valueQuantity'), 'unit'),
+        "date": try_get_val(entry, 'effectiveDateTime')
+    }
+    return cleaned
+
+
+def clean_medication(entry: dict):
+    cleaned = {
+        "name": try_get_val(entry['code'], 'text'),
+        "date": try_get_val(entry['meta'], 'lastUpdated')
+    }
+    return cleaned
+
+
+def clean_procedure(entry: dict):
+    cleaned = {
+        "name": try_get_val(entry['code'], 'text'),
+        "startDate": try_get_val(try_get_val(entry, 'performedPeriod'), 'start'),
+        "endDate": try_get_val(try_get_val(entry, 'performedPeriod'), 'end')
+    }
+    return cleaned
