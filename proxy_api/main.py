@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from services import open_ai_proxy
+from services import open_ai_proxy, open_ai_proxy_alerts
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -22,3 +22,8 @@ app.add_middleware(
 def open_ai(patient_data: FHIRBundle):
     response = open_ai_proxy.query_open_ai(patient_data.patient, patient_data.entries, patient_data.category, patient_data.role)
     return {"response": response}
+
+@app.post("/openai")
+def open_ai_alerts(patient_data: FHIRBundle):
+    response_alerts, response_medications, response_health_concerns, response_chain_of_thought_alerts_check = open_ai_proxy_alerts.query_open_ai(patient_data.patient, patient_data.entries, patient_data.category, patient_data.role)
+    return {"response": response_alerts, "medications": response_medications, "health_conditions":response_health_concerns, "any_alerts_check": response_chain_of_thought_alerts_check}
