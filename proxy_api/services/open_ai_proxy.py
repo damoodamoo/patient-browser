@@ -93,7 +93,3 @@ def clean_entries(entries: list):
             entry = {}
     
     return entries
-    if return_input:
-        return response, messages
-    else:
-        return response
