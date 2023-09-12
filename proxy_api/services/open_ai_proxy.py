@@ -31,18 +31,7 @@ def query_open_ai(patient: dict, entries: list, category: str, role: str):
         Provide references for any clinical advice from well trusted authorities. 
         Explain your answers using simple and concise language."""
 
-
-    #### THE FOLLOWING SHOW DIFFERENT OPTIONS TESTED ######
-
-    '''
-    Medication Side Effects
-
-    Pros: Specific and concise
-    Cons: Not overly general, focuses on medication
-
-    '''
-
-    response_side_effects = openai.ChatCompletion.create(
+    response = openai.ChatCompletion.create(
         engine=openai_deployment_name,
         messages=[
             {"role": "system", "content": setup_prompt},
