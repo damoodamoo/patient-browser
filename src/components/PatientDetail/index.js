@@ -387,30 +387,16 @@ export class PatientDetail extends React.Component {
                     <div className="container-fluid">
                         <div className="row navigator">
                             <div className="col-xs-4 col-sm-4 col-md-3 col-lg-2">
-                                <Link
-                                    to={`/patient/${this.state.index - 1}`}
-                                    className="btn btn-primary btn-block"
-                                    disabled={this.state.index < 1}
-                                >
-                                    <i className="fa fa-chevron-left" />
-                                    <b>Prev<span className="hidden-xs">ious Patient</span></b>
-                                </Link>
-                            </div>
-                            <div className="col-xs-4 col-sm-4 col-md-6 col-lg-8 text-center">
                                 <Link className="btn btn-block text-center" to="/">
+                                    <i className="fa fa-chevron-left" />
                                     <span className="hidden-xs">Browse Patients</span>
                                     <span className="visible-xs">Browse</span>
                                 </Link>
                             </div>
-                            <div className="col-xs-4 col-sm-4 col-md-3 col-lg-2 text-right">
-                                <Link
-                                    to={`/patient/${this.state.index + 1}`}
-                                    className="btn btn-primary btn-block"
-                                    disabled={!this.state.hasNext}
-                                >
-                                    <b>Next<span className="hidden-xs"> Patient</span></b>
-                                    <i className="fa fa-chevron-right" />
-                                </Link>
+                            <div className="col-xs-4 col-sm-4 col-md-6 col-lg-8 app-header-title">
+                                <h4 className="text-center">
+                                    Patient Co-Pilot
+                                </h4>
                             </div>
                         </div>
                     </div>
