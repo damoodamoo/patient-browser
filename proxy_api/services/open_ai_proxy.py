@@ -26,7 +26,7 @@ def query_open_ai(patient: dict, entries: list, category: str, role: str):
 
    # print(entries)
 
-    setup_prompt = """You play the role of a medical doctor. 
+    setup_prompt = """You play the role of a tumor board member and a Precision Medicine expert.
         Read data about the following patient and respond to their questions. 
         Provide references for any clinical advice from well trusted authorities. 
         Explain your answers using simple and concise language."""
@@ -35,9 +35,28 @@ def query_open_ai(patient: dict, entries: list, category: str, role: str):
         engine=openai_deployment_name,
         messages=[
             {"role": "system", "content": setup_prompt},
-            {"role": "user", "content": f'this is my patient data: {json.dumps(clean_patient(patient))}'},
-            {"role": "user", "content": f'this is my clinical data: {json.dumps(clean_entries(entries))}'},
-            {"role": "user", "content": f'write me a short summary of this {category} highlighting any areas that need my attention. Format your response as HTML body.'}
+            {"role": "user", "content": f'this is the patient data: {json.dumps(clean_patient(patient))}'},
+            {"role": "user", "content": f'this is the clinical data: {json.dumps(clean_entries(entries))}'},
+            {"role": "user", "content": f"""
+             As an active participant in a tumor board meeting, try to answer as many of the following questions: 
+             What is the patient's medical history, including any comorbidities or previous treatments?
+What are the histological and molecular characteristics of the tumor?
+What is the stage and grade of the cancer?
+Are there any genetic mutations or biomarkers that can guide treatment decisions?
+What are the imaging findings, and what do they indicate about the extent of the disease?
+What are the potential treatment options, including surgery, radiation, and systemic therapies?
+What are the expected outcomes and potential side effects of the proposed treatments?
+Are there any ongoing clinical trials that the patient might be eligible for?
+What are the patient's preferences and values regarding treatment and quality of life?
+Are there any psychosocial or financial considerations that might affect the patient's treatment plan?
+What is the recommended follow-up plan to monitor the patient's response to treatment and adjust the treatment plan as necessary?
+Are there any multidisciplinary interventions needed, such as input from nutritionists, physical therapists, or social workers?
+Are there any ethical considerations or potential conflicts of interest to be aware of?
+What is the consensus of the board regarding the best course of action for this patient?
+How will the treatment plan be communicated to the patient, and how will their consent be obtained? 
+             
+             Develop a comprehensive and individualized treatment plan that considers all aspects of the patient's condition and circumstances.
+             Format your response as HTML body."""}
         ],
         temperature=0,
         max_tokens=1200,
