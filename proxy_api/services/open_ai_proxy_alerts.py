@@ -47,22 +47,24 @@ def query_open_ai(patient: dict, entries: list, category: str, role: str):
     my_openai_obj = list(response_medications.choices)[0]
     response_text_medications = my_openai_obj.to_dict()['message']['content']
     
-    response_health_concerns = openai.ChatCompletion.create(
-        engine=openai_deployment_name,
-        messages=[
-            {"role": "system", "content": setup_prompt},
-            {"role": "user", "content": f'this is my patient data: {json.dumps(clean_patient(patient))}'},
-            {"role": "user", "content": f'this is my clinical data: {json.dumps(clean_entries(entries))}'},
-            {"role": "system", "content": f'What are significantly different, odd or anomalous health conditions of this patient for this {category}? Please only state the list of the anomalous health conditions and do not include any preambles, disclaimers, notes about the information source, or other superfluous information. Format your response as HTML body.'}],
-        temperature=0,
-        max_tokens=400,
-        top_p=0.95,
-        frequency_penalty=0,
-        presence_penalty=0,
-        stop=None)
+    # # chatGPT was getting confused if there were no medications but still health concerns.
+    # # It would respond that it could not find any medications, but then would not respond to the health concerns.
+    # response_health_concerns = openai.ChatCompletion.create(
+    #     engine=openai_deployment_name,
+    #     messages=[
+    #         {"role": "system", "content": setup_prompt},
+    #         {"role": "user", "content": f'this is my patient data: {json.dumps(clean_patient(patient))}'},
+    #         {"role": "user", "content": f'this is my clinical data: {json.dumps(clean_entries(entries))}'},
+    #         {"role": "system", "content": f'What are significantly different, odd or anomalous health conditions of this patient for this {category}? Please only state the list of the anomalous health conditions and do not include any preambles, disclaimers, notes about the information source, or other superfluous information. Format your response as HTML body.'}],
+    #     temperature=0,
+    #     max_tokens=400,
+    #     top_p=0.95,
+    #     frequency_penalty=0,
+    #     presence_penalty=0,
+    #     stop=None)
     
-    my_openai_obj = list(response_health_concerns.choices)[0]
-    response_text_health_concerns = my_openai_obj.to_dict()['message']['content']
+    # my_openai_obj = list(response_health_concerns.choices)[0]
+    # response_text_health_concerns = my_openai_obj.to_dict()['message']['content']
     
     # Feeds in the response from the prior prompt into the new
 
@@ -74,7 +76,7 @@ def query_open_ai(patient: dict, entries: list, category: str, role: str):
             {"role": "system", "content": setup_prompt},
             {"role": "user", "content": f'this is my patient data: {json.dumps(clean_patient(patient))}'},
             {"role": "user", "content": f'this is my clinical data: {json.dumps(clean_entries(entries))}'},
-            {"role": "system", "content": f'For this {category}, the recent (in the last 5 years) medications taken by this patient are listed here: {response_text_medications}. The anomalous health conditions of the patient are listed here: {response_text_health_concerns}. State the top 3 possible health risks or side effects, provided in a bulletted list, from these medications considering the health conditions of the patient? Only include the text listing of the possible risks, without superfluous text, notes, information about sources or disclaimers. Format your response as HTML body.'}],
+            {"role": "system", "content": f'For this {category}, the recent (in the last 5 years) medications taken by this patient are listed here: {response_text_medications}. State the top 3 possible health risks or side effects, provided in a bulletted list, from these medications considering the health conditions of the patient? Only include the text listing of the possible risks, without superfluous text, notes, information about sources or disclaimers. Format your response as HTML body.'}],
         temperature=0,
         max_tokens=800,
         top_p=0.95,
@@ -92,7 +94,7 @@ def query_open_ai(patient: dict, entries: list, category: str, role: str):
             {"role": "system", "content": setup_prompt},
             {"role": "user", "content": f'this is my patient data: {json.dumps(clean_patient(patient))}'},
             {"role": "user", "content": f'this is my clinical data: {json.dumps(clean_entries(entries))}'},
-            {"role": "system", "content": f'A review of possible health risks and side effects for this patient is included here: {response_text_alerts}. If health risks or side effects were not able to be determined, or if none were listed, then respond "No", otherwise respond "Yes". Please only say "Yes" or "No".'}],
+            {"role": "system", "content": f'A review of possible health risks and side effects for this patient is included here: {response_text_alerts}. If health risks or side effects were not able to be determined, if none were listed, or medications could not be found, then respond "No", otherwise respond "Yes". Please only say "Yes" or "No".'}],
         temperature=0,
         max_tokens=800,
         top_p=0.95,
@@ -105,7 +107,7 @@ def query_open_ai(patient: dict, entries: list, category: str, role: str):
     Return
     
     '''
-    return response_chain_of_thought_alerts, response_medications, response_health_concerns, response_chain_of_thought_alerts_check
+    return response_chain_of_thought_alerts, response_medications, response_chain_of_thought_alerts_check
 
 
 '''

@@ -17,6 +17,7 @@ import CarePlan from "../Fhir/CarePlan"
 import Person from "../Fhir/Person"
 import ResourceList from "../Fhir/ResourceList"
 import OpenApiWidget from "../Fhir/OpenApiWidget"
+import AnomalyAlert from "../Fhir/AnomalyAlert"
 import {
     getErrorMessage,
     getPatientName,
@@ -210,13 +211,24 @@ export class PatientDetail extends React.Component {
 
     // Rendering methods -------------------------------------------------------
 
-    renderPatient() {
+    renderPatient(selectedSubCat) {
         if (this.state.error) {
             return this.state.error + ""
         }
         let idLower = (this.state.patient.id || "").toLowerCase();
         let key = idLower && Object.keys(this.props.selection).find(k => k.toLowerCase() == idLower);
         let selected = key && this.props.selection[key] !== false;
+        if (!selectedSubCat || !this.state.groups[selectedSubCat]) {
+            selectedSubCat = Object.keys(this.state.groups)[0] || ""
+        }
+        let allResources = []
+        for (let p in this.state.groups){
+            if (p !== "Patient"){
+                for (let i = 0; i < this.state.groups[p].length; i++){
+                    allResources.push(this.state.groups[p][i]);
+                }
+            }
+        }
         return (
             <div className="panel panel-default patient col-xs-12">
                 <div className="row">
@@ -233,14 +245,17 @@ export class PatientDetail extends React.Component {
                     <div className="col-xs-10 col-md-11">
                         <div className="patient-row">
                             <div className="col-xs-7 patient-name">
-                                <h3 className="pull-left text-primary">
-                                    {getPatientName(this.state.patient) || (this.state.loading ? "loading..." : "Unknown")}
-                                </h3>
-                                {
-                                    selected ?
-                                        <i className="label label-success pull-left">Selected</i> :
-                                        null
-                                }
+                                <div>
+                                    <h3 className="pull-left text-primary">
+                                        {getPatientName(this.state.patient) || (this.state.loading ? "loading..." : "Unknown")}
+                                    </h3>
+                                    {
+                                        selected ?
+                                            <i className="label label-success pull-left">Selected</i> :
+                                            null
+                                    }
+                                </div>
+                                {!this.state.loading && <AnomalyAlert items={allResources} patient={this.state.patient} type={selectedSubCat} role="patient" />}
                             </div>
                             <div className="col-xs-5 text-right" style={{ paddingRight: 0 }}>
                                 <button
@@ -387,30 +402,16 @@ export class PatientDetail extends React.Component {
                     <div className="container-fluid">
                         <div className="row navigator">
                             <div className="col-xs-4 col-sm-4 col-md-3 col-lg-2">
-                                <Link
-                                    to={`/patient/${this.state.index - 1}`}
-                                    className="btn btn-primary btn-block"
-                                    disabled={this.state.index < 1}
-                                >
-                                    <i className="fa fa-chevron-left" />
-                                    <b>Prev<span className="hidden-xs">ious Patient</span></b>
-                                </Link>
-                            </div>
-                            <div className="col-xs-4 col-sm-4 col-md-6 col-lg-8 text-center">
                                 <Link className="btn btn-block text-center" to="/">
+                                    <i className="fa fa-chevron-left" />
                                     <span className="hidden-xs">Browse Patients</span>
                                     <span className="visible-xs">Browse</span>
                                 </Link>
                             </div>
-                            <div className="col-xs-4 col-sm-4 col-md-3 col-lg-2 text-right">
-                                <Link
-                                    to={`/patient/${this.state.index + 1}`}
-                                    className="btn btn-primary btn-block"
-                                    disabled={!this.state.hasNext}
-                                >
-                                    <b>Next<span className="hidden-xs"> Patient</span></b>
-                                    <i className="fa fa-chevron-right" />
-                                </Link>
+                            <div className="col-xs-4 col-sm-4 col-md-6 col-lg-8 app-header-title">
+                                <h4 className="text-center">
+                                    Patient Co-Pilot
+                                </h4>
                             </div>
                         </div>
                     </div>
