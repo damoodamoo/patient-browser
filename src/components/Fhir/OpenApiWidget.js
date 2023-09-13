@@ -88,7 +88,7 @@ export default class OpenApiWidget extends React.Component {
     render() {
         return (
             <div className="panel panel-default">
-                <div className="panel-heading"><b className="text-primary"><i className="fa fa-magic" style={{ marginRight: 5 }}></i>Open AI - {this.props.role}</b></div>
+                <div className="panel-heading"><b className="text-primary"><i className="fa fa-magic" style={{ marginRight: 5 }}></i>Open AI - Summary</b></div>
                 <div className="table-responsive" style={{ padding: 10 }}>
                     {
                         this.state.loading && <div style={{ textAlign: 'center' }}><i className="fa fa-spinner fa-spin fa-2x" title="Asking OpenAI..." style={{ margin: '20px auto' }}></i></div>
